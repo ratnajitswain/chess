@@ -7,7 +7,7 @@ import { Providers } from './Provides'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Multiplayer Chess',
+  title: 'Multiplayer Chess | Ratnajit',
   description: 'A multiplayer chess game built with Next.js',
 }
 
