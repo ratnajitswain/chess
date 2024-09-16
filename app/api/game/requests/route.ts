@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import dbConnect from '@/lib/mongodb';
 import GameRequest from '@/models/GameRequest';
-
+export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();

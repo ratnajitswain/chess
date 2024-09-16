@@ -6,7 +6,8 @@ import dbConnect from '@/lib/mongodb'
 import mongoose from 'mongoose'
 import GameRequest from '@/models/GameRequest'
 import { sendNotification } from '@/utils/notifications'  // We'll create this utility
-
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     await dbConnect()

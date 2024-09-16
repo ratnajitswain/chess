@@ -6,7 +6,7 @@ import mongoose from 'mongoose'
 import GameRequest from '@/models/GameRequest'
 import { createGame } from '@/utils/game'
 import { sendNotification } from '@/utils/notifications'
-
+export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     await dbConnect()

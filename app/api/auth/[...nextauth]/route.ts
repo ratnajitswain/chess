@@ -3,7 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { compare } from 'bcryptjs'
 import { getUserByEmail } from '@/utils/auth'
 import dbConnect from '@/lib/mongodb'
-import jwt from 'jsonwebtoken'
+export const dynamic = 'force-dynamic';
 
 // Make sure to set this in your environment variables
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
