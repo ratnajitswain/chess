@@ -69,10 +69,10 @@ function minimax(board: Chess, depth: number, alpha: number, beta: number, maxim
     let maxEval = -Infinity;
     for (const move of board.moves()) {
       board.move(move);
-      const eval = minimax(board, depth - 1, alpha, beta, false);
+      const evaluation = minimax(board, depth - 1, alpha, beta, false);
       board.undo();
-      maxEval = Math.max(maxEval, eval);
-      alpha = Math.max(alpha, eval);
+      maxEval = Math.max(maxEval, evaluation);
+      alpha = Math.max(alpha, evaluation);
       if (beta <= alpha) {
         break;
       }
@@ -82,10 +82,10 @@ function minimax(board: Chess, depth: number, alpha: number, beta: number, maxim
     let minEval = Infinity;
     for (const move of board.moves()) {
       board.move(move);
-      const eval = minimax(board, depth - 1, alpha, beta, true);
+      const evaluation = minimax(board, depth - 1, alpha, beta, true);
       board.undo();
-      minEval = Math.min(minEval, eval);
-      beta = Math.min(beta, eval);
+      minEval = Math.min(minEval, evaluation);
+      beta = Math.min(beta, evaluation);
       if (beta <= alpha) {
         break;
       }
@@ -101,11 +101,11 @@ function getMinimaxMove(fen: string): string {
 
   for (const move of chess.moves()) {
     chess.move(move);
-    const eval = minimax(chess, 3, -Infinity, Infinity, false);
+    const evaluation = minimax(chess, 3, -Infinity, Infinity, false);
     chess.undo();
 
-    if (eval > bestEval) {
-      bestEval = eval;
+    if (evaluation > bestEval) {
+      bestEval = evaluation;
       bestMove = move;
     }
   }
