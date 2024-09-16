@@ -29,7 +29,9 @@ export default function GamePage() {
         const response = await fetch(`/api/game/requests`)
         if (response.ok) {
           const fetchedRequests = await response.json()
-          if(fetchedRequests?.requests?.[0] && confirm('There is a game request')){
+          if(fetchedRequests?.requests?.[0]){
+            clearInterval(interval)
+            if(confirm('There is a game request')){
             const response = await fetch('/api/game/accept', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -39,6 +41,7 @@ export default function GamePage() {
               })
               let gameData = await response.json()
             setGameId(gameData.gameId)
+            }
           }
           
         }
