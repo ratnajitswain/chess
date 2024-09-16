@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../../../auth/[...nextauth]/route'
 export const dynamic = 'force-dynamic';
 import { makeAIMove } from '@/utils/ai';
+export const maxDuration = 60;
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
