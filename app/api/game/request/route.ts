@@ -5,6 +5,7 @@ import { getUserByEmail } from '@/utils/auth'
 import dbConnect from '@/lib/mongodb'
 import mongoose from 'mongoose'
 import GameRequest from '@/models/GameRequest'
+import { createGame } from '@/utils/game'
 import { sendNotification } from '@/utils/notifications'  // We'll create this utility
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -39,28 +40,41 @@ export async function POST(req: NextRequest) {
       requester: currentUser._id,
       opponent: opponentUser._id,
     })
+    if (opponentUser.email == process.env.AI_USER_ID) {
+      gameRequest.status = "accepted"
+      // Randomly assign colors
+      const [whitePlayerId, blackPlayerId] = Math.random() < 0.5
+        ? [gameRequest.requester._id, gameRequest.opponent._id]
+        : [gameRequest.opponent._id, gameRequest.requester._id]
 
+      // Create the game
+      const game = await createGame(whitePlayerId.toString(), blackPlayerId.toString())
+
+      // Update the game request
+      gameRequest.status = 'accepted'
+      gameRequest.game = game.id
+    }
     await gameRequest.save()
 
     // Send notification to the opponent
     await sendNotification(opponentUser._id, 'New game request', `${currentUser.name} has invited you to play a game of chess.`)
-    let gameData = await new Promise((resolve, reject)=>{
-       let interval = setInterval(async ()=>{
-          const gameData = await GameRequest.findById(gameRequest._id)
-          if(gameData.game){
-            clearInterval(interval)
-            return resolve(gameData.game)
-          }
-        },5000)
+    let gameData = await new Promise((resolve, reject) => {
+      let interval = setInterval(async () => {
+        const gameData = await GameRequest.findById(gameRequest._id)
+        if (gameData.game) {
+          clearInterval(interval)
+          return resolve(gameData.game)
+        }
+      }, 5000)
     })
-    return NextResponse.json({ 
+    return NextResponse.json({
       gameId: gameData?.toString() || null,
-      message: gameData?'Game accepted':'Timeout please send request again'
+      message: gameData ? 'Game accepted' : 'Timeout please send request again'
     }, { status: 201 })
 
   } catch (error) {
     console.error('Error creating game request:', error)
-    
+
     if (error instanceof mongoose.Error.ValidationError) {
       return NextResponse.json({ message: 'Invalid data provided' }, { status: 400 })
     }

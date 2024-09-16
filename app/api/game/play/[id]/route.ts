@@ -4,6 +4,7 @@ import { Chess } from 'chess.js'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../../../auth/[...nextauth]/route'
 export const dynamic = 'force-dynamic';
+import { makeAIMove } from '@/utils/ai';
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -42,9 +43,10 @@ export async function POST(
     return NextResponse.json({ error: 'Game not found' }, { status: 404 })
   }
 
-  // Check if it's the current player's turn
   const chess = new Chess()
   chess.loadPgn(game.moves.join(' '))
+
+  // Check if it's the current player's turn
   if (chess.turn() === 'w' && game.whitePlayer !== session.user.id) {
     return NextResponse.json({ error: 'Not your turn' }, { status: 400 })
   }
@@ -65,11 +67,38 @@ export async function POST(
       winner = 'draw'
     }
   }
-  let newMove = [...game.moves,move]
-  const updatedGame = await updateGame(gameId, newMove, winner)
+
+  let newMoves = [...game.moves, move]
+  let updatedGame = await updateGame(gameId, newMoves, winner)
   
   if (!updatedGame) {
     return NextResponse.json({ error: 'Failed to update game' }, { status: 400 })
+  }
+
+  // Check if it's AI's turn to move
+  if (!chess.isGameOver() && process.env.AI_USER_OBJECT_ID === (chess.turn() === 'w' ? game.whitePlayer : game.blackPlayer)) {
+    try {
+      const aiMove = await makeAIMove(chess.fen())
+      chess.move(aiMove)
+      newMoves.push(aiMove)
+
+      // Check for game over after AI move
+      if (chess.isGameOver()) {
+        if (chess.isCheckmate()) {
+          winner = chess.turn() === 'w' ? game.blackPlayer : game.whitePlayer
+        } else if (chess.isDraw()) {
+          winner = 'draw'
+        }
+      }
+
+      updatedGame = await updateGame(gameId, newMoves, winner)
+      if (!updatedGame) {
+        return NextResponse.json({ error: 'Failed to update game after AI move' }, { status: 400 })
+      }
+    } catch (error) {
+      console.error('Error making AI move:', error)
+      // If AI move fails, we'll return the game state after the human move
+    }
   }
 
   return NextResponse.json(updatedGame)

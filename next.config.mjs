@@ -13,8 +13,10 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   env:{
+    GOOGLE_AI_API_KEY:process.env.GOOGLE_AI_API_KEY,
     JWT_SECRET:process.env.JWT_SECRET,
-    MONGODB_URI:process.env.MONGODB_URI
+    MONGODB_URI:process.env.MONGODB_URI,
+    AI_USER_ID:process.env.AI_USER_ID
   }
 };
 
