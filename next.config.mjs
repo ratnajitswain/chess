@@ -16,7 +16,8 @@ const nextConfig = {
     GOOGLE_AI_API_KEY:process.env.GOOGLE_AI_API_KEY,
     JWT_SECRET:process.env.JWT_SECRET,
     MONGODB_URI:process.env.MONGODB_URI,
-    AI_USER_ID:process.env.AI_USER_ID
+    AI_USER_ID:process.env.AI_USER_ID,
+    AI_USER_OBJECT_ID:process.env.AI_USER_OBJECT_ID
   }
 };
 
