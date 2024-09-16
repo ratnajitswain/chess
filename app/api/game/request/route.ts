@@ -43,9 +43,7 @@ export async function POST(req: NextRequest) {
     if (opponentUser.email == process.env.AI_USER_ID) {
       gameRequest.status = "accepted"
       // Randomly assign colors
-      const [whitePlayerId, blackPlayerId] = Math.random() < 0.5
-        ? [gameRequest.requester._id, gameRequest.opponent._id]
-        : [gameRequest.opponent._id, gameRequest.requester._id]
+      const [whitePlayerId, blackPlayerId] =  [gameRequest.requester._id, gameRequest.opponent._id]
 
       // Create the game
       const game = await createGame(whitePlayerId.toString(), blackPlayerId.toString())
