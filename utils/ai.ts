@@ -19,23 +19,21 @@ async function getGeminiMove(fen: string): Promise<string> {
   As an expert chess AI, analyze this chess position and suggest the best move.
   Current position (FEN): ${fen}
   Legal moves: ${JSON.stringify(legalMoves)}
-  
-  Provide your response in the following JSON format:
-  {
-    "move": "e2e4",
-    "explanation": "Brief explanation of why this is the best move"
-  }
+
+  Just give the move position word response, donot explain or write anything else.
+  example response: 
+    "e2e4"(without quotes and without any spaces)
   `;
 
   try {
     const aiResponse = await getGeminiResponse(prompt);
-    const parsedResponse = JSON.parse(aiResponse);
+    // const parsedResponse = JSON.parse(aiResponse);
     
-    if (!parsedResponse.move) {
+    if (!aiResponse) {
       throw new Error("Invalid response from Gemini AI");
     }
 
-    return parsedResponse.move;
+    return aiResponse;
   } catch (error) {
     console.error("Error getting move from Gemini AI:", error);
     throw error;
