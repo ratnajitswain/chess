@@ -19,7 +19,7 @@ async function getGeminiResponse(prompt: string): Promise<string> {
 
 async function getGeminiMove(fen: string,newMoves:string[]): Promise<string> {
   const chess = new Chess(fen);
-  const legalMoves = chess.moves({ verbose: true });
+  const legalMoves = chess.moves();
 
 
   try {
@@ -27,7 +27,8 @@ async function getGeminiMove(fen: string,newMoves:string[]): Promise<string> {
     As an expert chess AI, analyze this chess position and suggest the best move.
     Current position (FEN): ${fen}
     Total moves till now: ${JSON.stringify(newMoves)}
-    Your color is black, game starts from white.
+    Legal moves:${JSON.stringify(legalMoves)}
+    Your color is black or b, game starts from white.
     Donot write any extra explanation, respond in that json format that can be parsed easily.
     Provide your response in the following JSON format:{"move": "e2e4","explanation": "Brief explanation of why this is the best move"}`;
   
