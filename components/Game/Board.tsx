@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Chess } from 'chess.js'
 import { Chessboard } from 'react-chessboard'
 import { useSession } from 'next-auth/react'
@@ -13,6 +13,7 @@ export default function Board({ gameId }: BoardProps) {
   const [isGameOver, setIsGameOver] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { data: session } = useSession()
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   const fetchGameState = useCallback(async () => {
     if (!gameId || !session?.user?.id) return
@@ -59,11 +60,22 @@ export default function Board({ gameId }: BoardProps) {
     }
   }, [gameId, session?.user?.id])
 
+  const startTimer = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+    }
+    intervalRef.current = setInterval(fetchGameState, 2000)
+  }, [fetchGameState])
+
   useEffect(() => {
     fetchGameState()
-    const interval = setInterval(fetchGameState, 2000) // Poll every 2 seconds
-    return () => clearInterval(interval)
-  }, [fetchGameState])
+    startTimer()
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [fetchGameState, startTimer])
 
   function onDrop(sourceSquare: string, targetSquare: string) {
     if (isGameOver || !gameId) return false
@@ -91,6 +103,9 @@ export default function Board({ gameId }: BoardProps) {
   }
 
   async function sendMoveToServer(move: any) {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+    }
     try {
       const response = await fetch(`/api/game/play/${gameId}`, {
         method: 'POST',
@@ -116,6 +131,11 @@ export default function Board({ gameId }: BoardProps) {
       setError('Error sending move to server. Please try again.')
       // Rollback the move if there was an error
       setGame(new Chess(game.fen()))
+    } finally {
+      // Restart interval fetchGameState here if it's not game over
+      if (!isGameOver) {
+        startTimer()
+      }
     }
   }
 
