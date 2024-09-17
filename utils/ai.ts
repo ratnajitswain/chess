@@ -27,7 +27,7 @@ async function getGeminiMove(fen: string,newMoves:string[]): Promise<string> {
     As an expert chess AI, analyze this chess position and suggest the best move.
     Current position (FEN): ${fen}
     Total moves: ${JSON.stringify(newMoves)}
-    Your color is black or b.
+    Your color is black, game starts from white.
     Donot write any extra explanation, respond in that json format that can be parsed easily.
     Provide your response in the following JSON format:{"move": "e2e4","explanation": "Brief explanation of why this is the best move"}`;
   

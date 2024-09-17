@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Board from '@/components/Game/Board'
@@ -13,6 +13,7 @@ export default function GamePage() {
   const router = useRouter()
   const [gameId, setGameId] = useState<string | null>(null)
   const [showRequestModal, setShowRequestModal] = useState(false)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -20,39 +21,46 @@ export default function GamePage() {
     }
   }, [status, router])
 
-  useEffect(()=>{
-
+  useEffect(() => {
     const fetchRequests = async () => {
-        if(gameId){
-            return clearInterval(interval)
+      if (gameId) {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current)
         }
-        const response = await fetch(`/api/game/requests`)
-        if (response.ok) {
-          const fetchedRequests = await response.json()
-          if(fetchedRequests?.requests?.[0]){
-            clearInterval(interval)
-            if(confirm('There is a game request')){
-            const response = await fetch('/api/game/accept', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    requestId: fetchedRequests.requests[0]?.id
-                }),
-              })
-              let gameData = await response.json()
-            setGameId(gameData.gameId)
-            }
+        return
+      }
+      const response = await fetch(`/api/game/requests`)
+      if (response.ok) {
+        const fetchedRequests = await response.json()
+        if (fetchedRequests?.requests?.[0]) {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current)
           }
-          
+          if (confirm('There is a game request')) {
+            const response = await fetch('/api/game/accept', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                requestId: fetchedRequests.requests[0]?.id
+              }),
+            })
+            let gameData = await response.json()
+            setGameId(gameData.gameId)
+          }
         }
       }
+    }
 
-      fetchRequests()
+    fetchRequests()
 
-    const interval = setInterval(fetchRequests, 5000) // Poll every 5 seconds
+    intervalRef.current = setInterval(fetchRequests, 5000) // Poll every 5 seconds
 
-    return () => clearInterval(interval)
-  },[])
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [gameId])
 
   if (status === 'loading') {
     return <div>Loading...</div>
