@@ -5,35 +5,38 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
 
 async function getGeminiResponse(prompt: string): Promise<string> {
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash",systemInstruction: "You are an expert chess AI, analyze chess position and suggest the best move." });
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    systemInstruction: "You are an expert chess AI, analyze chess position and suggest the best move.",
+    generationConfig: {
+      maxOutputTokens: 200
+    }
+  });
   const result = await model.generateContent(prompt);
   const response = await result.response;
   return response.text();
 }
 
-async function getGeminiMove(fen: string): Promise<string> {
+async function getGeminiMove(fen: string,newMoves:string[]): Promise<string> {
   const chess = new Chess(fen);
   const legalMoves = chess.moves({ verbose: true });
-  
-  const prompt = `
-  As an expert chess AI, analyze this chess position and suggest the best move.
-  Current position (FEN): ${fen}
-  Legal moves: ${JSON.stringify(legalMoves)}
 
-  Just give the move position word response, donot explain or write anything else.
-  example response: 
-    "e2e4"(without quotes and without any spaces)
-  `;
 
   try {
+    const prompt = `
+    As an expert chess AI, analyze this chess position and suggest the best move.
+    Current position (FEN): ${fen}
+    Total moves: ${JSON.stringify(newMoves)}
+    Your color is black or b.
+    Donot write any extra explanation, respond in that json format that can be parsed easily.
+    Provide your response in the following JSON format:{"move": "e2e4","explanation": "Brief explanation of why this is the best move"}`;
+  
     const aiResponse = await getGeminiResponse(prompt);
-    // const parsedResponse = JSON.parse(aiResponse);
-    
-    if (!aiResponse) {
-      throw new Error("Invalid response from Gemini AI");
-    }
-
-    return aiResponse;
+    const regex = /^[\s\S]*?(\{[\s\S]*\})[\s\S]*$/;
+    const result = aiResponse.replace(regex, '$1');
+    const parsedResponse = JSON.parse(result.trim());
+    console.log(parsedResponse)
+    return parsedResponse.move;
   } catch (error) {
     console.error("Error getting move from Gemini AI:", error);
     throw error;
@@ -111,7 +114,7 @@ function getMinimaxMove(fen: string): string {
   return bestMove || chess.moves()[0];
 }
 
-export async function makeAIMove(fen: string): Promise<string> {
+export async function makeAIMove(fen: string,newMoves:string[]): Promise<string> {
   const chess = new Chess(fen);
   
   if (chess.isGameOver()) {
@@ -120,7 +123,7 @@ export async function makeAIMove(fen: string): Promise<string> {
 
   try {
     // Try to get a move from Gemini AI
-    const geminiMove = await getGeminiMove(fen);
+    const geminiMove = await getGeminiMove(fen,newMoves);
     
     // Verify the move is legal
     if (chess.moves().includes(geminiMove)) {

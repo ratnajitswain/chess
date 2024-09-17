@@ -61,7 +61,7 @@ export default function Board({ gameId }: BoardProps) {
 
   useEffect(() => {
     fetchGameState()
-    const interval = setInterval(fetchGameState, 5000) // Poll every 5 seconds
+    const interval = setInterval(fetchGameState, 2000) // Poll every 2 seconds
     return () => clearInterval(interval)
   }, [fetchGameState])
 

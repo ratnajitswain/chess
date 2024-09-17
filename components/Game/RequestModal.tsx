@@ -53,7 +53,7 @@ export default function RequestModal({ onClose, onGameStart }: RequestModalProps
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 text-black bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-96">
         <h2 className="text-2xl font-semibold mb-4">Start New Game</h2>
         <form onSubmit={handleSubmit} className="space-y-4">

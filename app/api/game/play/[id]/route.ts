@@ -79,7 +79,7 @@ export async function POST(
   // Check if it's AI's turn to move
   if (!chess.isGameOver() && process.env.AI_USER_OBJECT_ID === (chess.turn() === 'w' ? game.whitePlayer : game.blackPlayer)) {
     try {
-      const aiMove = await makeAIMove(chess.fen())
+      const aiMove = await makeAIMove(chess.fen(),newMoves)
       chess.move(aiMove)
       newMoves.push(aiMove)
 
