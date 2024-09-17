@@ -26,7 +26,7 @@ async function getGeminiMove(fen: string,newMoves:string[]): Promise<string> {
     const prompt = `
     As an expert chess AI, analyze this chess position and suggest the best move.
     Current position (FEN): ${fen}
-    Total moves: ${JSON.stringify(newMoves)}
+    Total moves till now: ${JSON.stringify(newMoves)}
     Your color is black, game starts from white.
     Donot write any extra explanation, respond in that json format that can be parsed easily.
     Provide your response in the following JSON format:{"move": "e2e4","explanation": "Brief explanation of why this is the best move"}`;
@@ -126,10 +126,10 @@ export async function makeAIMove(fen: string,newMoves:string[]): Promise<string>
     const geminiMove = await getGeminiMove(fen,newMoves);
     
     // Verify the move is legal
-    // if (chess.moves().includes(geminiMove)) {
+    if (chess.moves().includes(geminiMove)) {
       console.log("Using Gemini AI move:", geminiMove);
       return geminiMove;
-    // }
+    }
 
     // If Gemini suggested an illegal move, fall back to minimax
     console.warn("Gemini suggested an illegal move. Falling back to minimax.");
